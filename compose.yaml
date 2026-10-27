@@ -1,0 +1,39 @@
+services:
+  app:
+    # Образ выбирается переменной: IMAGE_TAG=v0.2.0 docker compose up -d
+    # По умолчанию собираем локально из исходников.
+    image: ghcr.io/${GHCR_OWNER:-local}/guestbook:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      args:
+        APP_VERSION: ${IMAGE_TAG:-dev}
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: db # база доступна по имени сервиса
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-guestbook}
+      DB_USER: ${DB_USER:-guestbook}
+      DB_PASSWORD: ${DB_PASSWORD:?задайте DB_PASSWORD в .env}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-guestbook}
+      POSTGRES_USER: ${DB_USER:-guestbook}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?задайте DB_PASSWORD в .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-guestbook} -d ${DB_NAME:-guestbook}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  pgdata:
