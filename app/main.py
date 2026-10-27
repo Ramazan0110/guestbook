@@ -30,6 +30,7 @@ class EntryOut(BaseModel):
     id: int
     author: str
     message: str
+    likes: int
     created_at: datetime
 
 

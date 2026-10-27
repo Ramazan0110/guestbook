@@ -45,7 +45,8 @@ class PostgresStorage:
     def list_entries(self, limit: int) -> list[dict]:
         with connect() as conn:
             return conn.execute(
-                "SELECT id, author, message, created_at FROM entries ORDER BY id DESC LIMIT %s",
+                "SELECT id, author, message, likes, created_at FROM entries "
+                "ORDER BY id DESC LIMIT %s",
                 (limit,),
             ).fetchall()
 
@@ -53,7 +54,7 @@ class PostgresStorage:
         with connect() as conn:
             return conn.execute(
                 "INSERT INTO entries (author, message) VALUES (%s, %s) "
-                "RETURNING id, author, message, created_at",
+                "RETURNING id, author, message, likes, created_at",
                 (author, message),
             ).fetchone()
 
