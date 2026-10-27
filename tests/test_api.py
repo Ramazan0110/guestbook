@@ -25,6 +25,7 @@ class FakeStorage:
             "id": len(self.rows) + 1,
             "author": author,
             "message": message,
+            "likes": 0,
             "created_at": datetime.now(UTC),
         }
         self.rows.append(row)
@@ -68,6 +69,7 @@ def test_add_and_list_entries(client):
     assert r.status_code == 201
     assert r.json()["author"] == "Аня"
     assert r.json()["message"] == "Привет!"
+    assert r.json()["likes"] == 0
 
     r = client.get("/entries")
     assert r.status_code == 200
